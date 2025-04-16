@@ -7,7 +7,6 @@ public class Kuvitoenmaincra : MonoBehaviour
 
     private void Update()
     {
-        transform.position += Vector3.right * speed * Time.deltaTime;
-        
+        transform.position += Vector3.right * speed;
     }
 }
