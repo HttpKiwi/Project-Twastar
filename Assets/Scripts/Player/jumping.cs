@@ -30,13 +30,11 @@ public class PlayerJump : MonoBehaviour
         // Jump input
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            print("recargando");
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
         // Variable height: if player releases jump while rising, cut velocity
         if (Input.GetButtonUp("Jump") && rb.linearVelocity.y >= 0)
         {
-            print("actualizar");
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.8f); // soft cut
             // or rb.velocity.y = 0; for a hard cut
         }
