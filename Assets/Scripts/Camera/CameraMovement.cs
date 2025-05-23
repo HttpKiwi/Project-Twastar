@@ -30,23 +30,19 @@ namespace Camera
 
             float xPosition = 0f;
             float yPosition = 0f;
-            if (playerTransform.position.x <= transform.position.x + cameraAreaPosition + cameraLimitArea &&
-                 playerTransform.position.x >= transform.position.x + cameraAreaPosition - cameraLimitArea)
+            if (playerTransform.position.x >= transform.position.x + cameraAreaPosition - cameraLimitArea)
             {
                 xPosition += cameraLimitArea;
             }
-            else if (playerTransform.position.x <= transform.position.x - cameraAreaPosition + cameraLimitArea &&
-                playerTransform.position.x >= transform.position.x - cameraAreaPosition - cameraLimitArea)
+            else if (playerTransform.position.x <= transform.position.x - cameraAreaPosition + cameraLimitArea)
             {
                 xPosition -= cameraLimitArea;
             }
-            if (playerTransform.position.y <= transform.position.y + cameraAreaPosition + cameraLimitArea &&
-                playerTransform.position.y >= transform.position.y + cameraAreaPosition - cameraLimitArea)
+            if (playerTransform.position.y >= transform.position.y + cameraAreaPosition - cameraLimitArea)
             {
                 yPosition += cameraLimitArea;
             }
-            else if (playerTransform.position.y <= transform.position.y - cameraAreaPosition + cameraLimitArea &&
-                playerTransform.position.y >= transform.position.y - cameraAreaPosition - cameraLimitArea)
+            else if (playerTransform.position.y <= transform.position.y - cameraAreaPosition + cameraLimitArea)
             {
                 yPosition -= cameraLimitArea;
             }
