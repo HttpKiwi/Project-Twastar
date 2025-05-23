@@ -23,6 +23,7 @@ public class PlayerJump : MonoBehaviour
     }
     void Update()
     {
+        
         // Check if player is grounded (using a circle at the player's feet)
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
@@ -36,8 +37,10 @@ public class PlayerJump : MonoBehaviour
         if (Input.GetButtonUp("Jump") && rb.linearVelocity.y >= 0)
         {
             print("actualizar");
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f); // soft cut
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.8f); // soft cut
             // or rb.velocity.y = 0; for a hard cut
         }
     }
+
+    
 }
