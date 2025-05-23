@@ -6,7 +6,7 @@ public class PlayerJump : MonoBehaviour
     public float jumpForce = 5f;
     public LayerMask groundLayer;
     public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
+    public float groundCheckRadius = 0.1f;
 
     private Rigidbody2D rb;
     private bool isGrounded;
