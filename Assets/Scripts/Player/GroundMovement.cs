@@ -77,7 +77,7 @@ namespace Player
         private void CheckGroundStatus()
         {
             wasGrounded = isGrounded;
-            isGrounded = Physics2D.OverlapBox(groundCheck.position, new Vector3(1.75f, 0.05f, 1f), 0f);
+            isGrounded = Physics2D.OverlapBox(groundCheck.position, new Vector3(1.75f, 0.05f, 1f), 0f, groundLayer);
             
         }
         
