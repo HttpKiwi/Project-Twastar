@@ -13,7 +13,7 @@ namespace Player
     
         void Update()
         {
-            Flip();
+            FlipSprite();
             // Get input from keyboard
             _horizontalInput = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right
         }
@@ -24,7 +24,7 @@ namespace Player
             rb.linearVelocity = new Vector2(_horizontalInput * horizontalMoveSpeed, rb.linearVelocity.y);
         }
     
-        private void Flip()
+        private void FlipSprite()
         {
             transform.localScale = _horizontalInput switch
             {
