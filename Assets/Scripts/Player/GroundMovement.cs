@@ -8,6 +8,7 @@ namespace Player
         [SerializeField] private float moveSpeed = 6f;
         [SerializeField] private float acceleration = 20f;
         [SerializeField] private float friction = 15f;
+        [SerializeField] private float crouchSpeedReduction = 0.6f;
         
         [Header("Jump Settings")]
         [SerializeField] private float jumpHeight = 32f;
@@ -37,6 +38,7 @@ namespace Player
         // Movement State
         private bool isGrounded;
         private bool wasGrounded;
+        private bool isCrouched;
         private float coyoteTimeCounter;
         private float jumpBufferCounter;
         
@@ -102,7 +104,13 @@ namespace Player
         
         private void HandleMovement()
         {
-            float targetSpeed = horizontalInput * moveSpeed;
+            float baseMoveSpeed = moveSpeed;
+            if (isCrouched)
+            {
+                baseMoveSpeed = moveSpeed * crouchSpeedReduction;
+            }
+
+            float targetSpeed = horizontalInput * baseMoveSpeed;
             float currentSpeed = rb.linearVelocity.x;
             
             float speedDifference = targetSpeed - currentSpeed;
@@ -141,6 +149,7 @@ namespace Player
                     if (transform.localScale != new Vector3(transform.localScale.x, spriteYScale * crouchScale, transform.localScale.z))
                     {
                         transform.localScale = new Vector3(transform.localScale.x, spriteYScale * crouchScale, transform.localScale.z);
+                        isCrouched = true;
                     }
                     
                 }
@@ -149,6 +158,7 @@ namespace Player
                     if (transform.localScale.y != spriteYScale)
                     {
                         transform.localScale = new Vector3(transform.localScale.x, spriteYScale, transform.localScale.z);
+                        isCrouched = false;
                     }
                 }
             }
