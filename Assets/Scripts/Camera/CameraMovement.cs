@@ -17,6 +17,7 @@ namespace Camera
         
         void Start()
         {
+            Application.targetFrameRate = 60;
             _camera = GetComponent<UnityEngine.Camera>();
             
             float cameraHalfHeight = _camera.orthographicSize;
