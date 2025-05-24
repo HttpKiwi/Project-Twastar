@@ -6,9 +6,12 @@ namespace Player
     {
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 6f;
+        [SerializeField] private float maxMoveSpeed = 50f;
         [SerializeField] private float acceleration = 20f;
         [SerializeField] private float friction = 15f;
         [SerializeField] private float crouchSpeedReduction = 0.6f;
+        [SerializeField] private float iceSpeedMultiplier = 2f;
+        [SerializeField] private float mudSpeedReduction = 0.6f;
         
         [Header("Jump Settings")]
         [SerializeField] private float jumpHeight = 32f;
@@ -39,6 +42,8 @@ namespace Player
         private bool isGrounded;
         private bool wasGrounded;
         private bool isCrouched;
+        private bool onIce;
+        private bool onMud;
         private float coyoteTimeCounter;
         private float jumpBufferCounter;
         
@@ -85,8 +90,27 @@ namespace Player
         private void CheckGroundStatus()
         {
             wasGrounded = isGrounded;
-            isGrounded = Physics2D.OverlapBox(groundCheck.position, new Vector3(1.75f, 0.05f, 1f), 0f, groundLayer);
+
+            // Get all colliders under the player
+            Collider2D[] colliders = Physics2D.OverlapBoxAll(groundCheck.position, new Vector2(1.75f, 0.05f), 0f, groundLayer);
+
+            isGrounded = colliders.Length > 0;
+            onIce = false; // Reset ice detection
+            onMud = false;
             
+            foreach (var col in colliders)
+            {
+                if (col.CompareTag("Ice"))
+                {
+                    onIce = true;
+                    break; // No need to keep checking
+                } 
+                else if (col.CompareTag("Mud"))
+                {
+                    onMud = true;
+                    break;
+                }
+            }
         }
         
         private void HandleTimers()
@@ -104,30 +128,44 @@ namespace Player
         
         private void HandleMovement()
         {
-            float baseMoveSpeed = moveSpeed;
+
+            float baseMoveSpeed = CalculateMovementSpeed(moveSpeed);
+            float baseAcceleration = acceleration;
+            
             if (isCrouched)
             {
-                baseMoveSpeed = moveSpeed * crouchSpeedReduction;
+                baseMoveSpeed *= crouchSpeedReduction;
             }
-
+            
+            if (onIce)
+            {
+                baseAcceleration = 1f; // to lose control in ice
+            }
+            
             float targetSpeed = horizontalInput * baseMoveSpeed;
             float currentSpeed = rb.linearVelocity.x;
             
             float speedDifference = targetSpeed - currentSpeed;
-            float movementForce = speedDifference * (Mathf.Abs(horizontalInput) > 0.1f ? acceleration : friction);
+            float movementForce = speedDifference * (Mathf.Abs(horizontalInput) > 0.1f ? baseAcceleration : friction);
+            
+            movementForce = Mathf.Clamp(movementForce, -maxMoveSpeed, maxMoveSpeed);
             
             rb.AddForce(Vector2.right * movementForce, ForceMode2D.Force);
         }
         
         private void HandleJump()
         {
+            float baseMoveSpeed = CalculateMovementSpeed(rb.linearVelocity.x);
+            
+            baseMoveSpeed = Mathf.Clamp(baseMoveSpeed, -maxMoveSpeed, maxMoveSpeed);
+            
             // Can jump if: is grounded, in coyote time, or has a jump buffered
             bool canJump = (isGrounded || coyoteTimeCounter > 0f) && jumpBufferCounter > 0f;
             
             if (canJump)
             {
                 float jumpForce = Mathf.Sqrt(jumpHeight * -2f * Physics2D.gravity.y * rb.gravityScale);
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                rb.linearVelocity = new Vector2(baseMoveSpeed, jumpForce);
                 
                 coyoteTimeCounter = 0f;
                 jumpBufferCounter = 0f;
@@ -135,8 +173,23 @@ namespace Player
             
             if (!jumpHeld && rb.linearVelocity.y > 0.5f) 
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
+                rb.linearVelocity = new Vector2(baseMoveSpeed, rb.linearVelocity.y * jumpCutMultiplier);
             }
+        }
+
+        private float CalculateMovementSpeed(float baseMoveSpeed)
+        {
+            
+            if (onIce)
+            {
+                baseMoveSpeed *= iceSpeedMultiplier;
+            }
+            
+            if (onMud)
+            {
+                baseMoveSpeed *= mudSpeedReduction;
+            }
+            return baseMoveSpeed;
         }
         
         private void HandleTBag()
@@ -151,7 +204,6 @@ namespace Player
                         transform.localScale = new Vector3(transform.localScale.x, spriteYScale * crouchScale, transform.localScale.z);
                         isCrouched = true;
                     }
-                    
                 }
                 else
                 {
