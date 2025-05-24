@@ -21,7 +21,9 @@ namespace Player
         [SerializeField] private float groundCheckRadius = 0.2f;
         
         [Header("Visual")]
-        [SerializeField] private float spriteScale = 1f;
+        [SerializeField] private float spriteXScale = 1f;
+        [SerializeField] private float crouchScale = 0.9f;
+        [SerializeField] private float spriteYScale = 1f;
         
         // Components
         private Rigidbody2D rb;
@@ -30,6 +32,7 @@ namespace Player
         private float horizontalInput;
         private bool jumpPressed;
         private bool jumpHeld;
+        private float tBagHeld;
         
         // Movement State
         private bool isGrounded;
@@ -40,6 +43,7 @@ namespace Player
         void Start()
         {
             rb = GetComponent<Rigidbody2D>();
+            spriteYScale = transform.localScale.y;
         }
         
         void Update()
@@ -48,6 +52,7 @@ namespace Player
             CheckGroundStatus();
             HandleTimers();
             HandleJump();
+            HandleTBag();
             FlipSprite();
         }
         
@@ -72,6 +77,7 @@ namespace Player
             horizontalInput = Input.GetAxisRaw("Horizontal");
             jumpPressed = Input.GetButtonDown("Jump");
             jumpHeld = Input.GetButton("Jump");
+            tBagHeld = Input.GetAxisRaw("Vertical");
         }
         
         private void CheckGroundStatus()
@@ -125,13 +131,37 @@ namespace Player
             }
         }
         
+        private void HandleTBag()
+        {
+            // Can crouch if: is grounded
+            if (isGrounded)
+            {
+                if (tBagHeld < 0)
+                {
+                    if (transform.localScale != new Vector3(transform.localScale.x, spriteYScale * crouchScale, transform.localScale.z))
+                    {
+                        transform.localScale = new Vector3(transform.localScale.x, spriteYScale * crouchScale, transform.localScale.z);
+                    }
+                    
+                }
+                else
+                {
+                    if (transform.localScale.y != spriteYScale)
+                    {
+                        transform.localScale = new Vector3(transform.localScale.x, spriteYScale, transform.localScale.z);
+                    }
+                }
+            }
+        }
+        
         private void FlipSprite()
         {
-            if (Mathf.Abs(horizontalInput) > 0.1f)
+            transform.localScale = horizontalInput switch
             {
-                float direction = horizontalInput > 0 ? -1 : 1;
-                transform.localScale = new Vector2(direction * spriteScale, spriteScale);
-            }
+                < 0 => new Vector2(spriteXScale, transform.localScale.y),
+                > 0 => new Vector2(-spriteXScale, transform.localScale.y),
+                _ => transform.localScale
+            };
         }
         
         public bool IsGrounded => isGrounded;
